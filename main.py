@@ -4,6 +4,7 @@ from turtle import *
 
 # global
 alphabet_dict = {}
+knopka_dict = {}
 squareCoods = []
 countErrors = 0
 vibor = random.choice(word)
@@ -76,7 +77,7 @@ def draw_alphabet():
             y -= 80
         goto(x, y)
         write(alphabet[i], align='center', font=('Comic Sans MS', 40, 'bold'))
-        alphabet_dict[alphabet[i]] = (xcor(), ycor() + 30)
+        alphabet_dict[alphabet[i]] = (x, y + 30)
         x += 100
 
 
@@ -90,6 +91,13 @@ def button_alphabet(x, y):
             check_letter(key.lower())
             break
 
+    for key, centerCoord in knopka_dict.items():
+        if abs(centerCoord[0] - x) < 70 and abs(centerCoord[1] - y) < 70:
+            if key == 'ДА':
+                restart()
+            elif key == 'НЕТ':
+                bye()
+            break
 
 # функция отрисовки человека и виселицы:
 def draw_error(numError):
@@ -122,9 +130,10 @@ def draw_error(numError):
 
 def check_game(scorewin, score, numError):
     if score == scorewin:
-        print('ПОБЕДА')
+        end_game_status('ТЫ ВЫИГРАЛ!', 'green')
     elif numError == 10:
-        lose()
+        end_game_status('ТЫ ПРОИГРАЛ!', 'red')
+
 
 def check_letter(letter):
     global countErrors
@@ -143,12 +152,15 @@ def check_letter(letter):
     check_game(scorewin, score, countErrors)
 
 
-def lose():
+def end_game_status(fraze: str, color = 'black'):
+    global knopka_dict
+    knopka_dict['ДА'] = (-200, -400)
+    knopka_dict['НЕТ'] = (200, -400)
     alphabet_dict.clear()
     clear()
     goto(0, 200)
-    pencolor('red')
-    write('ТЫ ПРОИГРАЛ!', align='center', font=('Comic Sens MS', 55,'bold'))
+    pencolor(color)
+    write(fraze, align='center', font=('Comic Sens MS', 55,'bold'))
     pencolor('black')
     goto(0, 0)
     write('Загаданное слово:', align='center', font=('Comic Sens MS', 30,'bold'))
@@ -156,30 +168,41 @@ def lose():
     write(vibor, align='center', font=('Comic Sens MS', 55,'bold'))
     goto(0, -300)
     write('Желаете продолжить?', align='center', font=('Comic Sens MS', 55,'bold'))
-    goto(-200, -400)
+    goto(knopka_dict['ДА'][0], knopka_dict['ДА'][1] - 50)
     pencolor('green')
-    write('ДА', align='center', font=('Comic Sens MS', 55,'bold'))
-    goto(200, -400)
+    write(list(knopka_dict.keys())[0], align='center', font=('Comic Sens MS', 55,'bold'))
+    goto(knopka_dict['НЕТ'][0], knopka_dict['НЕТ'][1] - 50)
     pencolor('red')
-    write('НЕТ', align='center', font=('Comic Sens MS', 55,'bold'))
+    write(list(knopka_dict.keys())[1], align='center', font=('Comic Sens MS', 55,'bold'))
+
+def restart():
+    global alphabet_dict, knopka_dict, squareCoods, countErrors, vibor, score, scorewin
+    alphabet_dict = {}
+    knopka_dict = {}
+    squareCoods = []
+    countErrors = 0
+    color('black')
+    clear()
+    vibor = random.choice(word)
+    score = 0
+    scorewin = len(vibor)
+    penup()
+    # рисуем квадраты для слова:
+    draw_zagadka(vibor)
+    # пишем алфавит:
+    draw_alphabet()
 
 
 # экран
-
 Screen().setup(1200, 900)
-
 # отображение черепашки:
-
 shape("turtle")
 speed(0)
-penup()
+restart()
 
-# рисуем квадраты для слова:
 
-draw_zagadka(vibor)
 
-# пишем алфавит:
 
-draw_alphabet()
+
 onscreenclick(button_alphabet)
 mainloop()
